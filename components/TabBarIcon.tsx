@@ -1,15 +1,20 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { StyleSheet } from 'react-native';
+import { TABS } from 'consts/tabs';
+import { Film, Home, Search, Settings, Star } from 'lucide-react-native';
+import { TabBarIconProps, TabIcons } from './types';
+import { useMemo } from 'react';
 
-export const TabBarIcon = (props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) => {
-  return <FontAwesome size={28} style={styles.tabBarIcon} {...props} />;
+const icons: TabIcons = {
+  film: Film,
+  star: Star,
 };
 
-export const styles = StyleSheet.create({
-  tabBarIcon: {
-    marginBottom: -3,
-  },
-});
+export const TabBarIcon = ({ name, color, focused }: TabBarIconProps) => {
+  const Icon = icons[name];
+
+  const styles = useMemo(
+    () => `mb-[-3px] ${focused ? TABS.OPACITY.ACTIVE : TABS.OPACITY.INACTIVE}`,
+    [focused]
+  );
+
+  return <Icon size={TABS.ICON_SIZE} className={styles} color={color} />;
+};

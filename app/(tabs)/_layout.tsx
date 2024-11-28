@@ -1,31 +1,35 @@
-import { Link, Tabs } from 'expo-router';
+import { Platform } from 'react-native';
+import { Tabs } from 'expo-router';
 
-import { HeaderButton } from '../../components/HeaderButton';
-import { TabBarIcon } from '../../components/TabBarIcon';
+import { TabBarIcon } from 'components/TabBarIcon';
+import { TABS } from 'consts/tabs';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: 'black',
+        tabBarActiveTintColor: Platform.select({
+          ios: TABS.ACTIVE_TINT_COLOR.IOS,
+          android: TABS.ACTIVE_TINT_COLOR.ANDROID,
+          default: TABS.ACTIVE_TINT_COLOR.IOS,
+        }),
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <HeaderButton />
-            </Link>
+          title: TABS.TAB_NAMES.MOVIES,
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name="film" color={color} focused={focused} />
           ),
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="watchlist"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: TABS.TAB_NAMES.WATCHLIST,
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name="star" color={color} focused={focused} />
+          ),
         }}
       />
     </Tabs>
