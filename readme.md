@@ -1,4 +1,4 @@
-# Movie App (liron Bregman)
+# Movie App (Liron Bregman)
 
 React Native (Expo) app to discover popular movies and manage your watchlist.
 
@@ -8,7 +8,7 @@ React Native (Expo) app to discover popular movies and manage your watchlist.
 - Infinite scroll pagination
 - "Add to Watchlist" functionality
 - Responsive alien-themed UI
-- Movie details: rank, poster, title, popularity, rating
+- Movie details: rank, poster, title, rating
 
 ## Tech Stack
 
@@ -25,41 +25,52 @@ React Native (Expo) app to discover popular movies and manage your watchlist.
 
 1. Install dependencies:
 
-```bash
-npm install
-```
+yarn install
 
 2. Create `.env` file:
 
-```
 TMDB_API_KEY=your_api_key
-```
 
-3. Start development:
+3. Run:
 
-```bash
-npm start
-```
+npx expo run:ios --device
 
-4. Run on platform:
+### Additional Setup Steps
 
-```bash
-npm run ios
-# or
-npm run android
-```
+1. Prebuild Expo project:
+
+npx expo prebuild
+
+2. For Mac users - Enable Automation permissions:
+
+- Go to System Preferences
+- Navigate to Security & Privacy > Privacy
+- Select "Automation" from the left sidebar
+- Find Terminal/VSCode
+- Enable checkbox next to "System Events"
+
+3. If using React Native CLI (for iOS):
+
+cd ios
+pod deintegrate
+pod cache clean --all
+pod install
+
+4. Clean prebuild:
+
+npx expo prebuild --clean
 
 ## Project Structure
 
 ```
 src/
-  ├── app/                 # Expo Router screens
-  ├── components/          # Reusable components
-  ├── data/               # API/Cache logic
-  ├── hooks/              # Custom hooks
-  ├── types/              # TypeScript types
-  ├── utils/              # Helper functions
-  └── consts/             # Constants
+ ├── app/ # Expo Router screens
+ ├── components/ # Reusable components
+ ├── data/ # API/Cache logic
+ ├── hooks/ # Custom hooks
+ ├── types/ # TypeScript types
+ ├── utils/ # Helper functions
+ └── consts/ # Constants
 ```
 
 ## Folder Navigation
@@ -67,9 +78,29 @@ src/
 - `/` - Movies list
 - `/watchlist` - Saved movies
 
-## Additional Features - in the fe
+## Additional Features
 
-- Offline support via caching (not impl)
+- Offline support via caching (not implemented)
 - Performance optimized with FastImage
 
-# use Radon IDE extension to see it working without XCODE!
+## Development Tools
+
+- Use Radon IDE extension to see it working without Xcode!
+
+## Troubleshooting
+
+If you encounter build issues:
+
+1. Clear Expo cache:
+
+expo start --clear
+
+2. Reset Metro bundler:
+
+yarn start --reset-cache
+
+3. Clean Watchman:
+
+watchman watch-del-all
+
+USE RADON IDE EXTENSTION - FOR SAVE WORLD!

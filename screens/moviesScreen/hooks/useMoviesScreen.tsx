@@ -1,50 +1,73 @@
-import { useState, useCallback, useEffect } from 'react';
-import { View, ActivityIndicator } from 'react-native';
-import MovieListItem from '../components/MovieListItem';
-import { Movie } from '../types';
-import { getLocale, getCountry } from '../utils';
-import { createApiClient } from '../../../data/apiClient';
-import { DataCache } from '../../../data/DataCache';
-import { PAGE_SIZE } from '@/consts/list';
 import { useIsFocused } from '@react-navigation/native';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+
+import { DataCache } from '../../../data/DataCache';
+import { createApiClient } from '../../../data/apiClient';
+import MovieListItem from '../components/MovieListItem';
+import { API_ERROR, FETCH_ERROR } from '../consts';
+import { Movie, renderItemProps } from '../types';
+import { getLocale, getCountry } from '../utils';
+
+import { PAGE_SIZE } from '@/consts/screens';
+import { useListConfig } from '@/screens/shared/hooks/useListConfig';
 
 export function useMoviesScreen() {
   const isFocused = useIsFocused();
 
-  const api = createApiClient();
-  const cache = DataCache.getInstance();
+  const api = useMemo(() => createApiClient(), []);
+  const cache = useMemo(() => DataCache.getInstance(), []);
+
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(true);
+
   const [country, setCountry] = useState<string | null>(null);
   const [language, setLanguage] = useState<string | null>(null);
+
   const [isInitialized, setIsInitialized] = useState(false);
-  const [favoriteUpdate, setFavoriteUpdate] = useState(0);
+  const [watchlistUpdate, setWatchlistUpdate] = useState(0);
+
+  const { keyExtractor, getItemLayout, renderFooter, renderSeparator } = useListConfig();
 
   const handleHeartPress = useCallback(
     (movie: Movie) => {
-      cache.setWhitelistItem(movie);
-      setFavoriteUpdate((prev) => prev + 1);
-    },
-    [movies]
-  );
+      const isCurrentlyFavorite = cache.getWhitelistItem(movie.id) !== null;
 
-  const fetchMovies = async (pageNum: number): Promise<Movie[]> => {
-    try {
-      const data = await api.getPopularMovies(pageNum, language ?? undefined, country ?? undefined);
-
-      if (!data || !Array.isArray(data.results)) {
-        throw new Error('Invalid API response format');
+      if (isCurrentlyFavorite) {
+        cache.deleteWhitelistItem(movie);
+      } else {
+        cache.setWhitelistItem(movie);
       }
 
-      return data.results;
-    } catch (err) {
-      console.error('fetchMovies error:', err);
-      throw new Error(err instanceof Error ? err.message : 'Failed to fetch movies');
-    }
-  };
+      setWatchlistUpdate((prev) => prev + 1);
+    },
+    [cache, watchlistUpdate, isFocused]
+  );
+
+  const fetchMovies = useCallback(
+    async (pageNum: number): Promise<Movie[]> => {
+      try {
+        const data = await api.getPopularMovies(
+          pageNum,
+          language ?? undefined,
+          country ?? undefined
+        );
+
+        if (!data?.results?.length) {
+          throw new Error(API_ERROR);
+        }
+
+        return data.results;
+      } catch (err) {
+        console.error('fetchMovies error:', err);
+        throw new Error(err instanceof Error ? err.message : FETCH_ERROR);
+      }
+    },
+    [api, language, country]
+  );
 
   const fetchNextPage = useCallback(async () => {
     if (loading || !hasNextPage || !isInitialized) return;
@@ -54,41 +77,25 @@ export function useMoviesScreen() {
 
     try {
       const cachedData = cache.get(page);
-      if (cachedData && Array.isArray(cachedData)) {
-        setMovies((prev) => {
-          try {
-            return [...prev, ...cachedData];
-          } catch (err) {
-            console.error('State update error:', err);
-            return prev;
-          }
-        });
+      if (cachedData?.length) {
+        setMovies((prev) => [...prev, ...cachedData]);
         setPage((prev) => prev + 1);
         setHasNextPage(cachedData.length >= PAGE_SIZE);
         return;
       }
 
       const newMovies = await fetchMovies(page);
-      if (newMovies && Array.isArray(newMovies)) {
-        cache.set(page, newMovies);
-        setMovies((prev) => {
-          try {
-            return [...prev, ...newMovies];
-          } catch (err) {
-            console.error('State update error:', err);
-            return prev;
-          }
-        });
-        setPage((prev) => prev + 1);
-        setHasNextPage(newMovies.length >= PAGE_SIZE);
-      }
+      cache.set(page, newMovies);
+      setMovies((prev) => [...prev, ...newMovies]);
+      setPage((prev) => prev + 1);
+      setHasNextPage(newMovies.length >= PAGE_SIZE);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       console.error('Error fetching movies:', err);
     } finally {
       setLoading(false);
     }
-  }, [page, loading, hasNextPage, language, country, isInitialized]);
+  }, [page, loading, hasNextPage, isInitialized, cache, fetchMovies]);
 
   useEffect(() => {
     const init = async () => {
@@ -111,36 +118,23 @@ export function useMoviesScreen() {
     if (isInitialized) {
       fetchNextPage();
     }
-  }, [isInitialized]);
+  }, [isInitialized, fetchNextPage]);
 
   useEffect(() => {
     return () => cache.clear();
-  }, []);
+  }, [cache]);
 
   const renderItem = useCallback(
-    ({ item, index }: { item: Movie; index: number }) => (
+    ({ item, index }: renderItemProps) => (
       <MovieListItem
         movie={item}
         index={index}
-        onPressHeart={() => handleHeartPress(item)}
+        onPressHeart={handleHeartPress}
         isFavorite={cache.getWhitelistItem(item.id) !== null}
       />
     ),
-    [cache, isFocused, favoriteUpdate]
+    [cache, handleHeartPress, isFocused, watchlistUpdate]
   );
-
-  const keyExtractor = useCallback((item: Movie) => item.id.toString(), []);
-
-  const renderFooter = useCallback(() => {
-    if (!loading) return null;
-    return (
-      <View className="items-center justify-center py-4">
-        <ActivityIndicator size="small" />
-      </View>
-    );
-  }, [loading]);
-
-  const renderSeparator = useCallback(() => <View className="my-4 h-[4px] bg-gray-800" />, []);
 
   return {
     movies,
@@ -152,5 +146,6 @@ export function useMoviesScreen() {
     renderFooter,
     renderSeparator,
     onEndReached: fetchNextPage,
+    getItemLayout,
   };
 }

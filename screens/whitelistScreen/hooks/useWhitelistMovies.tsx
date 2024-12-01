@@ -1,28 +1,35 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useIsFocused } from '@react-navigation/native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { DataCache } from '@/data/DataCache';
 import MovieListItem from '@/screens/moviesScreen/components/MovieListItem';
 import { Movie } from '@/screens/moviesScreen/types';
-import { useIsFocused } from '@react-navigation/native';
+import { useListConfig } from '@/screens/shared/hooks/useListConfig';
 
 const useWhitelistMovies = () => {
   const isFocused = useIsFocused();
-  const [favoriteUpdate, setFavoriteUpdate] = useState(0);
-
-  const cache = DataCache.getInstance();
   const [whitelistMovies, setWhitelistMovies] = useState<Movie[]>([]);
+  const cache = useMemo(() => DataCache.getInstance(), []);
+  const { keyExtractor, getItemLayout, renderFooter, renderSeparator } = useListConfig();
 
   useEffect(() => {
-    const data = cache.getWhitelist();
-    setWhitelistMovies(data);
-  }, [isFocused, favoriteUpdate]);
+    if (isFocused) {
+      const data = cache.getWhitelist();
+      setWhitelistMovies(data);
+    }
+  }, [isFocused, cache]);
 
-  const handleHeartPress = useCallback((movie: Movie) => {
-    cache.deleteWhitelistItem(movie);
-    setFavoriteUpdate((prev) => prev + 1);
-  }, []);
-
-  const keyExtractor = useCallback((item: Movie) => item.id.toString(), []);
+  const handleHeartPress = useCallback(
+    (movie: Movie) => {
+      try {
+        cache.deleteWhitelistItem(movie);
+        setWhitelistMovies((prevMovies) => prevMovies.filter((m) => m.id !== movie.id));
+      } catch (error) {
+        console.error('Error removing movie from whitelist:', error);
+      }
+    },
+    [cache]
+  );
 
   const renderItem = useCallback(
     ({ item, index }: { item: Movie; index: number }) => (
@@ -30,13 +37,22 @@ const useWhitelistMovies = () => {
         movie={item}
         index={index}
         onPressHeart={() => handleHeartPress(item)}
-        isFavorite={cache.getWhitelistItem(item.id) !== null}
+        isFavorite
       />
     ),
-    [cache, favoriteUpdate]
+    [handleHeartPress]
   );
 
-  return { keyExtractor, renderItem, whitelistMovies };
+  return {
+    renderFooter,
+    renderSeparator,
+    keyExtractor,
+    renderItem,
+    getItemLayout,
+    whitelistMovies,
+    isLoading: false,
+    error: null,
+  };
 };
 
-export { useWhitelistMovies };
+export default useWhitelistMovies;

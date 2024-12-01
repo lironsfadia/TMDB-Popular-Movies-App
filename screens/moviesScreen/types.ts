@@ -22,4 +22,14 @@ interface MovieListItemProps {
   isFavorite?: boolean;
 }
 
-export { Movie, MovieListItemProps };
+interface useMovieListItemProps {
+  movie: Movie;
+  onPressHeart: (movie: Movie) => void;
+}
+
+interface renderItemProps {
+  item: Movie
+  index: number 
+}
+
+export { Movie, MovieListItemProps, useMovieListItemProps, renderItemProps };

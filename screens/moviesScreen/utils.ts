@@ -1,5 +1,5 @@
-import * as Location from 'expo-location';
 import { getLocales } from 'expo-localization';
+import * as Location from 'expo-location';
 
 const getLocale = () => {
   const deviceLanguage = getLocales()[0].languageTag ?? 'en-US';

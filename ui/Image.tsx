@@ -1,15 +1,26 @@
+import { StyleSheet } from 'react-native';
 import FastImage from 'react-native-fast-image';
 
-const Image = () => (
+import { ImageProps } from './types';
+
+const Image = ({
+  uri,
+  resizeMode = FastImage.resizeMode.cover,
+  priority = FastImage.priority.normal,
+}: ImageProps) => (
   <FastImage
-    style={{ flex: 1 }} // Using style prop instead of className
+    style={styles.image}
     source={{
-      uri: 'https://unsplash.it/400/400?image=1',
-      headers: { Authorization: 'someAuthToken' },
-      priority: FastImage.priority.normal,
+      uri: uri ?? 'https://unsplash.it/400/400?image=1',
+      priority,
     }}
-    resizeMode={FastImage.resizeMode.contain}
+    resizeMode={resizeMode}
   />
 );
-
+const styles = StyleSheet.create({
+  image: {
+    width: '40%',
+    aspectRatio: 1,
+  },
+});
 export default Image;

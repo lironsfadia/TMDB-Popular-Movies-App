@@ -1,8 +1,7 @@
-import { Platform } from 'react-native';
-import { Tabs } from 'expo-router';
-
 import { TabBarIcon } from 'components/TabBarIcon';
 import { TABS } from 'consts/tabs';
+import { Tabs } from 'expo-router';
+import { Platform } from 'react-native';
 
 export default function TabLayout() {
   return (

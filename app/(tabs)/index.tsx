@@ -1,10 +1,8 @@
-import { View, Text, ActivityIndicator, FlatList, SafeAreaView, StyleSheet } from 'react-native';
 import { Film } from 'lucide-react-native';
-
+import { View, Text, ActivityIndicator, FlatList, SafeAreaView, StyleSheet } from 'react-native';
 import { useMoviesScreen } from 'screens/moviesScreen/hooks/useMoviesScreen';
 
-import { FastText } from 'ui/FastText';
-import { ITEMS } from 'consts/list';
+import { SCREENS } from '@/consts/screens';
 
 export default function Home() {
   const {
@@ -16,6 +14,7 @@ export default function Home() {
     onEndReached,
     renderFooter,
     renderSeparator,
+    getItemLayout,
   } = useMoviesScreen();
 
   if (error) {
@@ -37,8 +36,8 @@ export default function Home() {
   return (
     <SafeAreaView className="flex-1 p-2">
       <View className="ios:p-6 android:p-4 mb-6 flex-row justify-start gap-2 border-b border-b-gray-200 bg-white">
-        <Film size={ITEMS.ICON_SIZE_LARGE} color={'green'} />
-        <Text className="ml-2 text-2xl font-bold color-green-600">Movies List!</Text>
+        <Film size={SCREENS.ICON_SIZE_LARGE} color={SCREENS.COLORS.GREEN} />
+        <Text className="ml-2 text-2xl font-bold color-green-600">Movies List</Text>
       </View>
 
       <FlatList
@@ -48,9 +47,10 @@ export default function Home() {
         keyExtractor={keyExtractor}
         onEndReached={onEndReached}
         contentContainerStyle={styles.listContainer}
-        onEndReachedThreshold={ITEMS.LIST.THRESHOLD}
+        onEndReachedThreshold={SCREENS.LIST.THRESHOLD}
         ListFooterComponent={renderFooter}
         ItemSeparatorComponent={renderSeparator}
+        getItemLayout={getItemLayout}
       />
     </SafeAreaView>
   );
@@ -58,7 +58,7 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   listContainer: {
-    padding: ITEMS.STYLES.PADDING,
-    gap: ITEMS.STYLES.GAP,
+    padding: SCREENS.STYLES.PADDING,
+    gap: SCREENS.STYLES.GAP,
   },
 });
