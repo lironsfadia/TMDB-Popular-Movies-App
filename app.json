@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "wix-assignment-react-native",
-    "slug": "wix-assignment-react-native",
+    "name": "assignment-react-native",
+    "slug": "assignment-react-native",
     "version": "1.0.0",
-    "scheme": "wix-assignment-react-native",
+    "scheme": "assignment-react-native",
     "web": {
       "bundler": "metro",
       "output": "static",
@@ -36,14 +36,14 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.wixassignmentreactnative"
+      "bundleIdentifier": "com.anonymous.assignmentreactnative"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.wixassignmentreactnative",
+      "package": "com.anonymous.assignmentreactnative",
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
