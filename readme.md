@@ -1,4 +1,4 @@
-# Movie App (Liron Bregman)
+# TMDB - Popular Movie App (Liron Bregman)
 
 React Native (Expo) app to discover popular movies and manage your watchlist.
 
